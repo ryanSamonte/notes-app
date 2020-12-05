@@ -1,6 +1,12 @@
 # notes-app
 
 ## Project setup
+
+### Firebase Config credentials
+```
+Rename the firebaseConfig.example.js to firebaseConfig.js and input your Firebase config credentials
+```
+### then proceed to
 ```
 npm install
 ```
