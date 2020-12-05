@@ -1,22 +1,20 @@
 <template>
   <div id="app">
+    <sign-in></sign-in>
   </div>
 </template>
 
 <script>
+import SignIn from './components/SignIn'
 
 export default {
-  name: 'App'
+  name: 'App',
+  components: {
+    'sign-in': SignIn
+  }
 }
 </script>
 
 <style>
-#app {
-  font-family: Roboto, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
+  @import './assets/style.css';
 </style>
