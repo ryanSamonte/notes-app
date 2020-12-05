@@ -19,44 +19,6 @@
                   <div class="md-layout-item md-small-size-100">
                     <md-field
                       :class="{
-                        'md-invalid': submitted && $v.user.first_name.$error,
-                      }"
-                    >
-                      <label for="first_name">First Name</label>
-                      <md-input
-                        v-model="user.first_name"
-                        name="first_name"
-                        id="first_name"
-                      />
-
-                      <span v-if="!$v.user.first_name.required" class="md-error"
-                        >First Name is required</span
-                      >
-                    </md-field>
-                  </div>
-
-                  <div class="md-layout-item md-small-size-100">
-                    <md-field
-                      :class="{
-                        'md-invalid': submitted && $v.user.last_name.$error,
-                      }"
-                    >
-                      <label for="last_name">Last Name</label>
-                      <md-input
-                        v-model="user.last_name"
-                        name="last_name"
-                        id="last_name"
-                      />
-
-                      <span v-if="!$v.user.last_name.required" class="md-error"
-                        >Last Name is required</span
-                      >
-                    </md-field>
-                  </div>
-
-                  <div class="md-layout-item md-small-size-100">
-                    <md-field
-                      :class="{
                         'md-invalid': submitted && $v.user.email.$error,
                       }"
                     >
@@ -131,7 +93,7 @@
               </md-card-actions>
 
               <p>
-                Already have an account? <router-link to="/">Login</router-link>
+                Already have an account? <router-link to="/sign-in">Login</router-link>
               </p>
             </md-card>
           </form>
@@ -146,15 +108,13 @@
 
 <script>
 import { required, email, sameAs } from "vuelidate/lib/validators";
-import db from "../firebaseInit";
+import firebase from "firebase";
 
 export default {
   name: "SignUp",
   data() {
     return {
       user: {
-        first_name: "",
-        last_name: "",
         email: "",
         password: "",
         confirm_password: "",
@@ -164,12 +124,6 @@ export default {
   },
   validations: {
     user: {
-      first_name: {
-        required,
-      },
-      last_name: {
-        required,
-      },
       email: {
         required,
         email,
@@ -187,30 +141,23 @@ export default {
     submitHandler() {
       this.submitted = true;
 
-      // stop here if form is invalid
       this.$v.$touch();
       if (this.$v.$invalid) {
         return;
+      } else {
+        firebase
+          .auth()
+          .createUserWithEmailAndPassword(this.user.email, this.user.password)
+          .then(
+            () => {
+              this.$router.push("/");
+            },
+            (err) => {
+              this.$toasted.error(err.message, { duration: 5000 });
+            }
+          );
       }
-
-      alert("SUCCESS!! :-)\n\n" + JSON.stringify(this.user));
-    },
-    readEmployees() {
-      this.employeesData = [];
-      db.collection("notes")
-        .get()
-        .then((querySnapshot) => {
-          querySnapshot.forEach((doc) => {
-            console.log(doc.data());
-          });
-        })
-        .catch((error) => {
-          console.log("Error getting documents: ", error);
-        });
-    },
-  },
-  mounted() {
-    this.readEmployees();
+    }
   }
 };
 </script>

@@ -66,7 +66,7 @@
 
               <p>
                 Don't have an account yet?
-                <router-link to="/signup">Create your Account Now</router-link>
+                <router-link to="/sign-up">Create your Account Now</router-link>
               </p>
             </md-card>
           </form>
@@ -81,6 +81,7 @@
 
 <script>
 import { required, email } from "vuelidate/lib/validators";
+import firebase from "firebase";
 
 export default {
   name: "SignIn",
@@ -108,14 +109,18 @@ export default {
     submitHandler() {
       this.submitted = true;
 
-      // stop here if form is invalid
       this.$v.$touch();
       if (this.$v.$invalid) {
         return;
+      }else{
+        firebase.auth().signInWithEmailAndPassword(this.user.email, this.user.password)
+          .then(() => {
+            this.$router.push('/')
+          }, err => {
+            this.$toasted.error(err.message, { position: 'bottom-right', duration: 5000 });
+          })
       }
-
-      alert("SUCCESS!! :-)\n\n" + JSON.stringify(this.user));
-    },
-  },
+    }
+  }
 };
 </script>

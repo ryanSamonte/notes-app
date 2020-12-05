@@ -2,6 +2,9 @@ import Vue from 'vue'
 import App from './App.vue'
 import Vuelidate from 'vuelidate'
 import router from './router'
+import Toasted from 'vue-toasted';
+import firebase from 'firebase';
+import './firebaseInit';
 
 import { MdCard, MdField, MdButton } from 'vue-material/dist/components'
 import 'vue-material/dist/vue-material.min.css'
@@ -13,9 +16,17 @@ Vue.use(MdButton)
 
 Vue.use(Vuelidate)
 
-new Vue({
-  router,
-  render: h => h(App)
-}).$mount('#app')
+Vue.use(Toasted)
 
 Vue.config.productionTip = false
+
+let app;
+
+firebase.auth().onAuthStateChanged(() => {
+  if(!app) {
+    app = new Vue({
+      router,
+      render: h => h(App)
+    }).$mount('#app')
+  }
+})
