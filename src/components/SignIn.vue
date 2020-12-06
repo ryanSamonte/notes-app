@@ -115,7 +115,7 @@ export default {
       }else{
         firebase.auth().signInWithEmailAndPassword(this.user.email, this.user.password)
           .then(() => {
-            this.$router.push('/')
+            this.$router.push('/notes/all')
           }, err => {
             this.$toasted.error(err.message, { position: 'bottom-right', duration: 5000 });
           })

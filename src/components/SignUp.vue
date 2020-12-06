@@ -150,7 +150,7 @@ export default {
           .createUserWithEmailAndPassword(this.user.email, this.user.password)
           .then(
             () => {
-              this.$router.push("/");
+              this.$router.push("/notes/all");
             },
             (err) => {
               this.$toasted.error(err.message, { duration: 5000 });

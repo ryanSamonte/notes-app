@@ -6,13 +6,21 @@ import Toasted from 'vue-toasted';
 import firebase from 'firebase';
 import './firebaseInit';
 
-import { MdCard, MdField, MdButton } from 'vue-material/dist/components'
+import { MdCard, MdField, MdButton, MdApp, MdDrawer, MdToolbar, MdList, MdContent, MdDialog, MdDialogConfirm, MdEmptyState } from 'vue-material/dist/components'
 import 'vue-material/dist/vue-material.min.css'
 import 'vue-material/dist/theme/default.css'
 
 Vue.use(MdCard)
 Vue.use(MdField)
 Vue.use(MdButton)
+Vue.use(MdApp)
+Vue.use(MdDrawer)
+Vue.use(MdToolbar)
+Vue.use(MdList)
+Vue.use(MdContent)
+Vue.use(MdDialog)
+Vue.use(MdDialogConfirm)
+Vue.use(MdEmptyState)
 
 Vue.use(Vuelidate)
 
