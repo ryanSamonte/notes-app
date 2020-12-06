@@ -3,6 +3,9 @@ import VueRouter from 'vue-router'
 import SignIn from '../components/SignIn.vue'
 import SignUp from '../components/SignUp.vue'
 import Home from '../components/Home.vue'
+import CompletedNotes from '../components/CompletedNotes.vue'
+import PendingNotes from '../components/PendingNotes.vue'
+import AllNotes from '../components/AllNotes.vue'
 import firebase from 'firebase'
 
 Vue.use(VueRouter)
@@ -25,9 +28,23 @@ const routes = [
     }
   },
   {
-    path: '/',
+    path: '/notes',
     name: 'Home',
     component: Home,
+    children: [
+      {
+        path: 'all',
+        component: AllNotes
+      },
+      {
+        path: 'completed',
+        component: CompletedNotes
+      },
+      {
+        path: 'pending',
+        component: PendingNotes
+      }
+    ],
     meta: {
       requiresAuth: true
     }
@@ -56,7 +73,7 @@ router.beforeEach((to, from, next) => {
   }else if(to.matched.some(record => record.meta.requiresGuest)){
     if(firebase.auth().currentUser){
       next({
-        path: '/',
+        path: '/notes/all',
         query: {
           redirect: to.fullPath
         }
