@@ -1,40 +1,62 @@
-import Vue from 'vue'
-import App from './App.vue'
-import Vuelidate from 'vuelidate'
-import router from './router'
-import Toasted from 'vue-toasted';
-import firebase from 'firebase';
-import './firebaseInit';
+import Vue from "vue";
+import App from "./App.vue";
+import Vuelidate from "vuelidate";
+import router from "./router";
+import Toasted from "vue-toasted";
+import firebase from "firebase";
+import vueTopprogress from 'vue-top-progress'
 
-import { MdCard, MdField, MdButton, MdApp, MdDrawer, MdToolbar, MdList, MdContent, MdDialog, MdDialogConfirm, MdEmptyState } from 'vue-material/dist/components'
-import 'vue-material/dist/vue-material.min.css'
-import 'vue-material/dist/theme/default.css'
+Vue.use(vueTopprogress);
 
-Vue.use(MdCard)
-Vue.use(MdField)
-Vue.use(MdButton)
-Vue.use(MdApp)
-Vue.use(MdDrawer)
-Vue.use(MdToolbar)
-Vue.use(MdList)
-Vue.use(MdContent)
-Vue.use(MdDialog)
-Vue.use(MdDialogConfirm)
-Vue.use(MdEmptyState)
+import "./firebaseInit";
 
-Vue.use(Vuelidate)
+import {
+  MdCard,
+  MdField,
+  MdButton,
+  MdApp,
+  MdDrawer,
+  MdToolbar,
+  MdList,
+  MdContent,
+  MdDialog,
+  MdDialogConfirm,
+  MdEmptyState,
+  MdTooltip,
+  MdBadge,
+  MdProgress,
+} from "vue-material/dist/components";
+import "vue-material/dist/vue-material.min.css";
+import "vue-material/dist/theme/default.css";
 
-Vue.use(Toasted)
+Vue.use(MdCard);
+Vue.use(MdField);
+Vue.use(MdButton);
+Vue.use(MdApp);
+Vue.use(MdDrawer);
+Vue.use(MdToolbar);
+Vue.use(MdList);
+Vue.use(MdContent);
+Vue.use(MdDialog);
+Vue.use(MdDialogConfirm);
+Vue.use(MdEmptyState);
+Vue.use(MdTooltip);
+Vue.use(MdBadge);
+Vue.use(MdProgress);
 
-Vue.config.productionTip = false
+Vue.use(Vuelidate);
+
+Vue.use(Toasted);
+
+Vue.config.productionTip = false;
 
 let app;
 
 firebase.auth().onAuthStateChanged(() => {
-  if(!app) {
+  if (!app) {
     app = new Vue({
       router,
-      render: h => h(App)
-    }).$mount('#app')
+      render: (h) => h(App),
+    }).$mount("#app");
   }
-})
+});

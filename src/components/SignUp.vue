@@ -153,7 +153,7 @@ export default {
               this.$router.push("/notes/all");
             },
             (err) => {
-              this.$toasted.error(err.message, { duration: 5000 });
+              this.$toasted.error(err.message, { position: 'bottom-right', duration: 5000 });
             }
           );
       }
