@@ -4,7 +4,7 @@
       <md-app-toolbar class="md-primary" md-elevation="0">
         <md-button
           class="md-icon-button"
-          @click="toggleMenu"
+          v-on:click="toggleMenu"
           v-if="!isMenuVisible"
         >
           <md-icon>menu</md-icon>
@@ -17,7 +17,7 @@
           <span>NAVIGATION</span>
 
           <div class="md-toolbar-section-end">
-            <md-button class="md-icon-button md-dense" @click="toggleMenu">
+            <md-button class="md-icon-button md-dense" v-on:click="toggleMenu">
               <md-icon>keyboard_arrow_left</md-icon>
             </md-button>
           </div>
@@ -94,7 +94,7 @@
           <md-button
             type="button"
             class="md-dense md-raised md-danger"
-            @click="isNewNoteDialogVisible = false"
+            v-on:click="isNewNoteDialogVisible = false"
             >Close</md-button
           >
           <md-button type="submit" class="md-dense md-raised md-primary"
@@ -119,9 +119,10 @@
 import { required } from "vuelidate/lib/validators";
 import firebase from "firebase";
 import db from "../firebaseInit";
+import { event_bus } from "../EventBus";
 
 export default {
-  name: "Home",
+  name: "PageContainer",
   data() {
     return {
       isMenuVisible: false,
@@ -174,15 +175,22 @@ export default {
             user_id: firebase.auth().currentUser.uid,
             title: this.note.title,
             content: this.note.content,
-            is_completed: false
+            is_completed: false,
           })
           .then(() => {
-              this.isNewNoteDialogVisible = false;
-              this.$toasted.info("Note Added", { position: 'bottom-right', duration: 5000 });
+            event_bus.$emit("trigger-retrieve");
+            this.isNewNoteDialogVisible = false;
+            this.$toasted.info("Note Added", {
+              position: "bottom-right",
+              duration: 5000,
+            });
           })
           .catch(() => {
-              this.isNewNoteDialogVisible = false;
-              this.$toasted.error("Somethings went wrong. Please try again later.", { position: 'bottom-right', duration: 5000 });
+            this.isNewNoteDialogVisible = false;
+            this.$toasted.error(
+              "Somethings went wrong. Please try again later.",
+              { position: "bottom-right", duration: 5000 }
+            );
           });
       }
     },

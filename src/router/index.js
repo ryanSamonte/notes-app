@@ -2,10 +2,10 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import SignIn from '../components/SignIn.vue'
 import SignUp from '../components/SignUp.vue'
-import Home from '../components/Home.vue'
-import CompletedNotes from '../components/CompletedNotes.vue'
-import PendingNotes from '../components/PendingNotes.vue'
-import AllNotes from '../components/AllNotes.vue'
+import PageContainer from '../components/PageContainer.vue'
+import NotesCompleted from '../components/NotesCompleted.vue'
+import NotesPending from '../components/NotesPending.vue'
+import NotesAll from '../components/NotesAll.vue'
 import firebase from 'firebase'
 
 Vue.use(VueRouter)
@@ -29,20 +29,20 @@ const routes = [
   },
   {
     path: '/notes',
-    name: 'Home',
-    component: Home,
+    name: 'PageContainer',
+    component: PageContainer,
     children: [
       {
         path: 'all',
-        component: AllNotes
+        component: NotesAll
       },
       {
         path: 'completed',
-        component: CompletedNotes
+        component: NotesCompleted
       },
       {
         path: 'pending',
-        component: PendingNotes
+        component: NotesPending
       }
     ],
     meta: {
