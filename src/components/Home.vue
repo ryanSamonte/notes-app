@@ -24,7 +24,7 @@
         </md-toolbar>
 
         <md-list>
-          <md-list-item>
+          <md-list-item v-on:click="isNewNoteDialogVisible = true">
             <md-icon>add</md-icon>
             <span class="md-list-item-text">New Note</span>
           </md-list-item>
@@ -52,9 +52,57 @@
       </md-app-drawer>
 
       <md-app-content>
-        <router-view/>
+        <router-view />
       </md-app-content>
     </md-app>
+
+    <md-dialog :md-active.sync="isNewNoteDialogVisible">
+      <md-dialog-title>Create New Note</md-dialog-title>
+
+      <form @submit.prevent="submitHandler" class="p-4">
+        <div class="md-layout md-gutter">
+          <div class="md-layout-item md-small-size-100">
+            <md-field
+              :class="{
+                'md-invalid': isSubmitted && $v.note.title.$error,
+              }"
+            >
+              <label for="title">Title</label>
+              <md-input v-model="note.title" name="title" id="title" />
+
+              <span v-if="!$v.note.title.required" class="md-error"
+                >Title is required</span
+              >
+            </md-field>
+
+            <md-field
+              :class="{
+                'md-invalid': isSubmitted && $v.note.content.$error,
+              }"
+            >
+              <label for="content">Content</label>
+              <md-textarea v-model="note.content" md-autogrow></md-textarea>
+
+              <span v-if="!$v.note.content.required" class="md-error"
+                >Content is required</span
+              >
+            </md-field>
+          </div>
+        </div>
+
+        <md-dialog-actions>
+          <md-button
+            type="button"
+            class="md-dense md-raised md-danger"
+            @click="isNewNoteDialogVisible = false"
+            >Close</md-button
+          >
+          <md-button type="submit" class="md-dense md-raised md-primary"
+            >Save</md-button
+          >
+        </md-dialog-actions>
+      </form>
+    </md-dialog>
 
     <md-dialog-confirm
       :md-active.sync="isConfirmLogoutActive"
@@ -62,27 +110,46 @@
       md-content=""
       md-confirm-text="Yes"
       md-cancel-text="Cancel"
-      @md-confirm="onConfirmLogoutHandler" />
+      @md-confirm="onConfirmLogoutHandler"
+    />
   </div>
 </template>
 
 <script>
+import { required } from "vuelidate/lib/validators";
 import firebase from "firebase";
+import db from "../firebaseInit";
 
 export default {
   name: "Home",
   data() {
     return {
       isMenuVisible: false,
-      isConfirmLogoutActive: false
+      isNewNoteDialogVisible: false,
+      isConfirmLogoutActive: false,
+      note: {
+        title: "",
+        content: "",
+      },
+      isSubmitted: false,
     };
+  },
+  validations: {
+    note: {
+      title: {
+        required,
+      },
+      content: {
+        required,
+      },
+    },
   },
   methods: {
     toggleMenu() {
       this.isMenuVisible = !this.isMenuVisible;
     },
     goToRouteHandler(path) {
-      if (this.$route.path !== path) this.$router.push(path)
+      if (this.$route.path !== path) this.$router.push(path);
     },
     toggleConfirmLogout() {
       this.isConfirmLogoutActive = true;
@@ -95,6 +162,30 @@ export default {
           this.$router.push("/sign-in");
         });
     },
+    submitHandler() {
+      this.isSubmitted = true;
+      this.$v.$touch();
+
+      if (this.$v.$invalid) {
+        return;
+      } else {
+        db.collection("notes")
+          .add({
+            user_id: firebase.auth().currentUser.uid,
+            title: this.note.title,
+            content: this.note.content,
+            is_completed: false
+          })
+          .then(() => {
+              this.isNewNoteDialogVisible = false;
+              this.$toasted.info("Note Added", { position: 'bottom-right', duration: 5000 });
+          })
+          .catch(() => {
+              this.isNewNoteDialogVisible = false;
+              this.$toasted.error("Somethings went wrong. Please try again later.", { position: 'bottom-right', duration: 5000 });
+          });
+      }
+    },
   },
 };
 </script>
@@ -102,6 +193,13 @@ export default {
 <style scoped>
 .md-app {
   height: 100vh;
+}
+
+.md-toolbar {
+  position: sticky;
+  position: -webkit-sticky;
+  left: 0;
+  right: 0;
 }
 
 .md-toolbar.md-theme-default.md-primary {
