@@ -19,7 +19,7 @@
                   <div class="md-layout-item md-small-size-100">
                     <md-field
                       :class="{
-                        'md-invalid': submitted && $v.user.email.$error,
+                        'md-invalid': isSubmitted && $v.user.email.$error,
                       }"
                     >
                       <label for="email">Email</label>
@@ -37,7 +37,7 @@
                   <div class="md-layout-item md-small-size-100">
                     <md-field
                       :class="{
-                        'md-invalid': submitted && $v.user.password.$error,
+                        'md-invalid': isSubmitted && $v.user.password.$error,
                       }"
                     >
                       <label for="password">Password</label>
@@ -91,7 +91,7 @@ export default {
         email: "",
         password: "",
       },
-      submitted: false,
+      isSubmitted: false,
     };
   },
   validations: {
@@ -107,20 +107,28 @@ export default {
   },
   methods: {
     submitHandler() {
-      this.submitted = true;
+      this.isSubmitted = true;
 
       this.$v.$touch();
       if (this.$v.$invalid) {
         return;
-      }else{
-        firebase.auth().signInWithEmailAndPassword(this.user.email, this.user.password)
-          .then(() => {
-            this.$router.push('/notes/all')
-          }, err => {
-            this.$toasted.error(err.message, { position: 'bottom-right', duration: 5000 });
-          })
+      } else {
+        firebase
+          .auth()
+          .signInWithEmailAndPassword(this.user.email, this.user.password)
+          .then(
+            () => {
+              this.$router.push("/notes/all");
+            },
+            (err) => {
+              this.$toasted.error(err.message, {
+                position: "bottom-right",
+                duration: 5000,
+              });
+            }
+          );
       }
-    }
-  }
+    },
+  },
 };
 </script>

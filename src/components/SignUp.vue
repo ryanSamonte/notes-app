@@ -19,7 +19,7 @@
                   <div class="md-layout-item md-small-size-100">
                     <md-field
                       :class="{
-                        'md-invalid': submitted && $v.user.email.$error,
+                        'md-invalid': isSubmitted && $v.user.email.$error,
                       }"
                     >
                       <label for="email">Email</label>
@@ -37,7 +37,7 @@
                   <div class="md-layout-item md-small-size-100">
                     <md-field
                       :class="{
-                        'md-invalid': submitted && $v.user.password.$error,
+                        'md-invalid': isSubmitted && $v.user.password.$error,
                       }"
                     >
                       <label for="password">Password</label>
@@ -58,24 +58,24 @@
                     <md-field
                       :class="{
                         'md-invalid':
-                          submitted && $v.user.confirm_password.$error,
+                          isSubmitted && $v.user.confirmPassword.$error,
                       }"
                     >
-                      <label for="confirm_password">Confirm Password</label>
+                      <label for="confirmPassword">Confirm Password</label>
                       <md-input
-                        v-model="user.confirm_password"
+                        v-model="user.confirmPassword"
                         type="password"
-                        name="confirm_password"
-                        id="confirm_password"
+                        name="confirmPassword"
+                        id="confirmPassword"
                       />
 
                       <span
-                        v-if="!$v.user.confirm_password.required"
+                        v-if="!$v.user.confirmPassword.required"
                         class="md-error"
                         >Password is required</span
                       >
                       <span
-                        v-if="!$v.user.confirm_password.sameAsPassword"
+                        v-if="!$v.user.confirmPassword.sameAsPassword"
                         class="md-error"
                         >Password must match</span
                       >
@@ -93,7 +93,8 @@
               </md-card-actions>
 
               <p>
-                Already have an account? <router-link to="/sign-in">Login</router-link>
+                Already have an account?
+                <router-link to="/sign-in">Login</router-link>
               </p>
             </md-card>
           </form>
@@ -117,9 +118,9 @@ export default {
       user: {
         email: "",
         password: "",
-        confirm_password: "",
+        confirmPassword: "",
       },
-      submitted: false,
+      isSubmitted: false,
     };
   },
   validations: {
@@ -131,7 +132,7 @@ export default {
       password: {
         required,
       },
-      confirm_password: {
+      confirmPassword: {
         required,
         sameAsPassword: sameAs("password"),
       },
@@ -139,7 +140,7 @@ export default {
   },
   methods: {
     submitHandler() {
-      this.submitted = true;
+      this.isSubmitted = true;
 
       this.$v.$touch();
       if (this.$v.$invalid) {
@@ -153,11 +154,14 @@ export default {
               this.$router.push("/notes/all");
             },
             (err) => {
-              this.$toasted.error(err.message, { position: 'bottom-right', duration: 5000 });
+              this.$toasted.error(err.message, {
+                position: "bottom-right",
+                duration: 5000,
+              });
             }
           );
       }
-    }
-  }
+    },
+  },
 };
 </script>

@@ -11,6 +11,18 @@
       <md-button class="md-primary md-raised">Take my First Note</md-button>
     </md-empty-state>
 
+    <!-- Modal for Note Details -->
+    <notes-view
+      v-if="isViewModalVisible"
+      @close="isViewModalVisible = false"
+      :data="noteModalData"
+    ></notes-view>
+    <notes-edit
+      v-if="isEditModalVisible"
+      @close="isEditModalVisible = false"
+      :data="noteModalData"
+    ></notes-edit>
+
     <div v-if="isEmpty === false" class="md-layout md-alignment-center">
       <div
         v-for="(note, i) in notes"
@@ -31,20 +43,26 @@
               <md-badge
                 v-if="note.is_completed === true"
                 class="md-primary md-square"
-                md-content="Completed"
+                md-content="COMPLETED"
               />
               <md-badge
                 v-if="note.is_completed === false"
-                class="md-square"
-                md-content="Pending"
+                class="md-primary md-square"
+                md-content="PENDING"
               />
 
-              <md-button class="md-icon-button">
+              <md-button
+                v-on:click="openViewModalHandler(note)"
+                class="md-icon-button"
+              >
                 <md-icon>article</md-icon>
                 <md-tooltip md-direction="bottom">View Note</md-tooltip>
               </md-button>
 
-              <md-button class="md-icon-button">
+              <md-button
+                v-on:click="openEditModalHandler(note)"
+                class="md-icon-button"
+              >
                 <md-icon>edit</md-icon>
                 <md-tooltip md-direction="bottom">Edit Note</md-tooltip>
               </md-button>
@@ -67,7 +85,9 @@
                 <span v-if="note.is_completed === false">
                   <md-icon>check</md-icon>
 
-                  <md-tooltip md-direction="bottom">Mark as Completed</md-tooltip>
+                  <md-tooltip md-direction="bottom"
+                    >Mark as Completed</md-tooltip
+                  >
                 </span>
               </md-button>
             </md-card-actions>
@@ -81,46 +101,77 @@
 <script>
 import firebase from "firebase";
 import db from "../firebaseInit";
+import { event_bus } from "../EventBus";
+import NotesView from "./NotesView";
+import NotesEdit from "./NotesEdit";
 
 export default {
-  name: "AllNotes",
+  name: "NotesItemList",
+  components: {
+    "notes-view": NotesView,
+    "notes-edit": NotesEdit,
+  },
+  props: {
+    filterByStatus: String,
+  },
   data() {
     return {
       notes: [],
       isEmpty: false,
+      filterBy: this.filterByStatus,
+      isViewModalVisible: false,
+      isEditModalVisible: false,
+      noteModalData: null,
     };
   },
   methods: {
     retrieveNotes() {
       this.$refs.topProgress.start();
 
-      db.collection("notes")
-        .where("user_id", "==", firebase.auth().currentUser.uid)
-        .get()
-        .then((querySnapshot) => {
-          let size = querySnapshot.size;
-          let responseData = [];
+      let queryResult;
 
-          if (size > 0) {
-            querySnapshot.forEach((doc) => {
-              const data = {
-                id: doc.id,
-                user_id: doc.data().user_id,
-                title: doc.data().title,
-                content: doc.data().content,
-                is_completed: doc.data().is_completed,
-              };
+      queryResult = db
+        .collection("notes")
+        .where("user_id", "==", firebase.auth().currentUser.uid);
 
-              responseData.push(data);
-            });
-          } else {
-            this.isEmpty = true;
-          }
+      if (this.filterBy === "completed") {
+        queryResult = queryResult.where("is_completed", "==", true);
+      } else if (this.filterBy === "pending") {
+        queryResult = queryResult.where("is_completed", "==", false);
+      }
 
-          this.notes = responseData;
+      queryResult.get().then((querySnapshot) => {
+        let size = querySnapshot.size;
+        let responseData = [];
 
-          this.$refs.topProgress.done();
-        });
+        if (size > 0) {
+          querySnapshot.forEach((doc) => {
+            const data = {
+              id: doc.id,
+              user_id: doc.data().user_id,
+              title: doc.data().title,
+              content: doc.data().content,
+              is_completed: doc.data().is_completed,
+            };
+
+            responseData.push(data);
+          });
+        } else {
+          this.isEmpty = true;
+        }
+
+        this.notes = responseData;
+
+        this.$refs.topProgress.done();
+      });
+    },
+    openViewModalHandler(noteData) {
+      this.noteModalData = noteData;
+      this.isViewModalVisible = true;
+    },
+    openEditModalHandler(noteData) {
+      this.noteModalData = noteData;
+      this.isEditModalVisible = true;
     },
     changeStatusHandler(id) {
       this.$refs.topProgress.start();
@@ -136,13 +187,17 @@ export default {
               })
               .then(() => {
                 this.retrieveNotes();
-                console.log("done");
               });
           });
         });
 
       this.$refs.topProgress.done();
     },
+  },
+  created() {
+    event_bus.$on("trigger-retrieve", () => {
+      this.retrieveNotes();
+    });
   },
   mounted() {
     this.retrieveNotes();
