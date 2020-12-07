@@ -63,8 +63,8 @@
 </template>
 
 <script>
+const firebaseConfig = require("../firebaseInit");
 import { required } from "vuelidate/lib/validators";
-import db from "../firebaseInit";
 import { event_bus } from "../EventBus";
 
 export default {
@@ -104,7 +104,7 @@ export default {
       } else {
         this.isLoading = true;
 
-        db.collection("notes")
+        firebaseConfig.notesCollection
           .where("__name__", "==", this.note.id)
           .get()
           .then((querySnapshot) => {
@@ -113,6 +113,7 @@ export default {
                 .update({
                   title: this.note.title,
                   content: this.note.content,
+                  updated_at: firebaseConfig.firebase.firestore.Timestamp.now(),
                 })
                 .then(() => {
                   this.isLoading = false;

@@ -3,7 +3,8 @@ import App from "./App.vue";
 import Vuelidate from "vuelidate";
 import router from "./router";
 import Toasted from "vue-toasted";
-import firebase from "firebase";
+import firebase from "firebase/app";
+import "firebase/auth";
 import vueTopprogress from 'vue-top-progress'
 
 Vue.use(vueTopprogress);
