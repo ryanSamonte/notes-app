@@ -1,6 +1,6 @@
 <template>
   <div>
-    <notes-item-list filter-by-status="pending"></notes-item-list>
+    <notes-item-list empty-state-label="No Pending Notes Yet" empty-state-description="" filter-by-status="pending"></notes-item-list>
   </div>
 </template>
 

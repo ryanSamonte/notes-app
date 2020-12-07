@@ -1,6 +1,6 @@
 <template>
   <div>
-    <notes-item-list filter-by-status="completed"></notes-item-list>
+    <notes-item-list empty-state-label="No Completed Notes Yet" empty-state-description="" filter-by-status="completed"></notes-item-list>
   </div>
 </template>
 
