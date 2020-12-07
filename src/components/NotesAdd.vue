@@ -62,9 +62,10 @@
 </template>
 
 <script>
+const firebaseConfig = require("../firebaseInit");
 import { required } from "vuelidate/lib/validators";
-import firebase from "firebase";
-import db from "../firebaseInit";
+import firebase from "firebase/app";
+import "firebase/auth";
 import { event_bus } from "../EventBus";
 
 export default {
@@ -100,12 +101,14 @@ export default {
       } else {
         this.isLoading = true;
 
-        db.collection("notes")
+        firebaseConfig.notesCollection
           .add({
             user_id: firebase.auth().currentUser.uid,
             title: this.note.title,
             content: this.note.content,
             is_completed: false,
+            created_at: firebaseConfig.firebase.firestore.Timestamp.now(),
+            updated_at: null,
           })
           .then(() => {
             this.isLoading = false;

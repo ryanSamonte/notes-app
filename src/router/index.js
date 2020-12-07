@@ -6,11 +6,16 @@ import PageContainer from '../components/PageContainer.vue'
 import NotesCompleted from '../components/NotesCompleted.vue'
 import NotesPending from '../components/NotesPending.vue'
 import NotesAll from '../components/NotesAll.vue'
-import firebase from 'firebase'
+import firebase from 'firebase/app'
+import "firebase/auth";
 
 Vue.use(VueRouter)
 
 const routes = [
+  {
+    path: '/',
+    redirect: '/notes/all'
+  },
   {
     path: '/sign-in',
     name: 'SignIn',

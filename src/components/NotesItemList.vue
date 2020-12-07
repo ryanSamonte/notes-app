@@ -53,7 +53,9 @@
         <div class="p-2">
           <md-card class="p-1">
             <md-card-header>
-              <h1>{{ noteContentFormatted(note.title, 35) }}</h1>
+              <h1 class="word-wrap">
+                {{ noteContentFormatted(note.title, 35) }}
+              </h1>
             </md-card-header>
 
             <md-card-content>
@@ -126,8 +128,9 @@
 </template>
 
 <script>
-import firebase from "firebase";
-import db from "../firebaseInit";
+const firebaseConfig = require("../firebaseInit");
+import firebase from "firebase/app";
+import "firebase/auth";
 import { event_bus } from "../EventBus";
 import NotesAdd from "./NotesAdd";
 import NotesView from "./NotesView";
@@ -167,9 +170,11 @@ export default {
 
       let queryResult;
 
-      queryResult = db
-        .collection("notes")
-        .where("user_id", "==", firebase.auth().currentUser.uid);
+      queryResult = firebaseConfig.notesCollection.where(
+        "user_id",
+        "==",
+        firebase.auth().currentUser.uid
+      );
 
       if (this.filterBy === "completed") {
         queryResult = queryResult.where("is_completed", "==", true);
@@ -177,7 +182,7 @@ export default {
         queryResult = queryResult.where("is_completed", "==", false);
       }
 
-      queryResult.get().then((querySnapshot) => {
+      queryResult.orderBy('created_at', 'desc').get().then((querySnapshot) => {
         let size = querySnapshot.size;
         let responseData = [];
 
@@ -191,6 +196,8 @@ export default {
               title: doc.data().title,
               content: doc.data().content,
               is_completed: doc.data().is_completed,
+              created_at: doc.data().created_at,
+              updated_at: doc.data().updated_at,
             };
 
             responseData.push(data);
@@ -228,7 +235,7 @@ export default {
       this.isConfirmDeleteActive = true;
     },
     onConfirmDeleteHandler(id) {
-      db.collection("notes")
+      firebaseConfig.notesCollection
         .where("__name__", "==", id)
         .get()
         .then((querySnapshot) => {
@@ -252,7 +259,7 @@ export default {
     changeStatusHandler(id) {
       this.isChangeStatusLoading = true;
 
-      db.collection("notes")
+      firebaseConfig.notesCollection
         .where("__name__", "==", id)
         .get()
         .then((querySnapshot) => {
