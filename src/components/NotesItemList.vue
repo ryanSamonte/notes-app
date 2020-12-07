@@ -5,13 +5,24 @@
     <md-empty-state
       v-if="isEmpty === true"
       md-icon="devices_other"
-      md-label="Oh! Looks like you don't have any notes yet"
-      md-description="Start taking notes now and manage it all here"
+      :md-label="emptyNotesStateLabel"
+      :md-description="emptyNotesStateDescription"
     >
-      <md-button class="md-primary md-raised">Take my First Note</md-button>
+      <md-button
+        v-if="filterBy === 'all'"
+        v-on:click="isNewNoteDialogVisible = true"
+        class="md-primary md-raised"
+        >Add my First Note</md-button
+      >
     </md-empty-state>
 
     <!-- Modal for Note Details -->
+
+    <notes-add
+      v-if="isNewNoteDialogVisible"
+      @close="isNewNoteDialogVisible = false"
+    ></notes-add>
+
     <notes-view
       v-if="isViewModalVisible"
       @close="isViewModalVisible = false"
@@ -22,6 +33,15 @@
       @close="isEditModalVisible = false"
       :data="noteModalData"
     ></notes-edit>
+
+    <md-dialog-confirm
+      :md-active.sync="isConfirmDeleteActive"
+      md-title="Are you sure you want to delete this note?"
+      md-content=""
+      md-confirm-text="Yes"
+      md-cancel-text="Cancel"
+      @md-confirm="onConfirmDeleteHandler(noteIdToDelete)"
+    />
 
     <div v-if="isEmpty === false" class="md-layout md-alignment-center">
       <div
@@ -67,7 +87,10 @@
                 <md-tooltip md-direction="bottom">Edit Note</md-tooltip>
               </md-button>
 
-              <md-button class="md-icon-button">
+              <md-button
+                v-on:click="toggleConfirmDelete(note.id)"
+                class="md-icon-button"
+              >
                 <md-icon>delete</md-icon>
                 <md-tooltip md-direction="bottom">Delete Note</md-tooltip>
               </md-button>
@@ -102,26 +125,35 @@
 import firebase from "firebase";
 import db from "../firebaseInit";
 import { event_bus } from "../EventBus";
+import NotesAdd from "./NotesAdd";
 import NotesView from "./NotesView";
 import NotesEdit from "./NotesEdit";
 
 export default {
   name: "NotesItemList",
   components: {
+    "notes-add": NotesAdd,
     "notes-view": NotesView,
     "notes-edit": NotesEdit,
   },
   props: {
     filterByStatus: String,
+    emptyStateLabel: String,
+    emptyStateDescription: String,
   },
   data() {
     return {
       notes: [],
       isEmpty: false,
       filterBy: this.filterByStatus,
+      emptyNotesStateLabel: this.emptyStateLabel,
+      emptyNotesStateDescription: this.emptyStateDescription,
+      isNewNoteDialogVisible: false,
       isViewModalVisible: false,
       isEditModalVisible: false,
+      isConfirmDeleteActive: false,
       noteModalData: null,
+      noteIdToDelete: null,
     };
   },
   methods: {
@@ -145,6 +177,8 @@ export default {
         let responseData = [];
 
         if (size > 0) {
+          this.isEmpty = false;
+
           querySnapshot.forEach((doc) => {
             const data = {
               id: doc.id,
@@ -172,6 +206,26 @@ export default {
     openEditModalHandler(noteData) {
       this.noteModalData = noteData;
       this.isEditModalVisible = true;
+    },
+    toggleConfirmDelete(id) {
+      this.noteIdToDelete = id;
+      this.isConfirmDeleteActive = true;
+    },
+    onConfirmDeleteHandler(id) {
+      db.collection("notes")
+        .where("__name__", "==", id)
+        .get()
+        .then((querySnapshot) => {
+          querySnapshot.forEach((doc) => {
+            doc.ref.delete();
+          });
+
+          this.retrieveNotes();
+          this.$toasted.info("Note Deleted", {
+            position: "bottom-right",
+            duration: 5000,
+          });
+        });
     },
     changeStatusHandler(id) {
       this.$refs.topProgress.start();
@@ -206,14 +260,6 @@ export default {
 </script>
 
 <style scoped>
-.md-empty-state-label {
-  color: #ffffff;
-}
-
-.md-empty-state-description {
-  color: #ffffff;
-}
-
 .md-badge {
   position: absolute;
   left: 20px;

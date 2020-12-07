@@ -1,6 +1,6 @@
 <template>
   <div>
-    <notes-item-list filter-by-status="all"></notes-item-list>
+    <notes-item-list empty-state-label="Oh! Looks like you don't have any notes yet" empty-state-description="Start taking notes now and manage it all here" filter-by-status="all"></notes-item-list>
   </div>
 </template>
 
