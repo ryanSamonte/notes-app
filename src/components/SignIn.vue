@@ -60,6 +60,7 @@
                 <md-button
                   type="submit"
                   class="md-dense md-raised md-primary m-auto"
+                  :disabled="isLoading"
                   >Sign-In</md-button
                 >
               </md-card-actions>
@@ -92,6 +93,7 @@ export default {
         password: "",
       },
       isSubmitted: false,
+      isLoading: false
     };
   },
   validations: {
@@ -113,14 +115,20 @@ export default {
       if (this.$v.$invalid) {
         return;
       } else {
+        this.isLoading = true;
+
         firebase
           .auth()
           .signInWithEmailAndPassword(this.user.email, this.user.password)
           .then(
             () => {
+              this.isLoading = false;
+
               this.$router.push("/notes/all");
             },
             (err) => {
+              this.isLoading = false;
+
               this.$toasted.error(err.message, {
                 position: "bottom-right",
                 duration: 5000,

@@ -10,9 +10,11 @@
           <md-icon>menu</md-icon>
         </md-button>
         <span class="md-title">Notes App</span>
+
+        <span class="user-name">{{ userEmail }}</span>
       </md-app-toolbar>
 
-      <md-app-drawer :md-active.sync="isMenuVisible" md-persistent="mini">
+      <md-app-drawer :md-active.sync="isMenuVisible">
         <md-toolbar class="md-transparent" md-elevation="0">
           <span>NAVIGATION</span>
 
@@ -86,6 +88,7 @@ export default {
       isMenuVisible: false,
       isNewNoteDialogVisible: false,
       isConfirmLogoutActive: false,
+      userEmail: firebase.auth().currentUser.email,
     };
   },
   methods: {

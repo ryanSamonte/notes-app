@@ -4,7 +4,7 @@
 
     <md-empty-state
       v-if="isEmpty === true"
-      md-icon="devices_other"
+      md-icon="article"
       :md-label="emptyNotesStateLabel"
       :md-description="emptyNotesStateDescription"
     >
@@ -28,6 +28,7 @@
       @close="isViewModalVisible = false"
       :data="noteModalData"
     ></notes-view>
+
     <notes-edit
       v-if="isEditModalVisible"
       @close="isEditModalVisible = false"
@@ -52,11 +53,13 @@
         <div class="p-2">
           <md-card class="p-1">
             <md-card-header>
-              <h1>{{ note.title }}</h1>
+              <h1>{{ noteContentFormatted(note.title, 35) }}</h1>
             </md-card-header>
 
             <md-card-content>
-              <p>{{ note.content }}</p>
+              <p class="word-wrap">
+                {{ noteContentFormatted(note.content, 90) }}
+              </p>
             </md-card-content>
 
             <md-card-actions>
@@ -98,6 +101,7 @@
               <md-button
                 v-on:click="changeStatusHandler(note.id)"
                 class="md-icon-button"
+                :disabled="isChangeStatusLoading"
               >
                 <span v-if="note.is_completed === true">
                   <md-icon>close</md-icon>
@@ -154,6 +158,7 @@ export default {
       isConfirmDeleteActive: false,
       noteModalData: null,
       noteIdToDelete: null,
+      isChangeStatusLoading: false,
     };
   },
   methods: {
@@ -199,6 +204,17 @@ export default {
         this.$refs.topProgress.done();
       });
     },
+    noteContentFormatted(content, maxLength) {
+      let formattedContent;
+
+      if (content.length > maxLength) {
+        formattedContent = content.substr(0, maxLength) + "...";
+      } else {
+        formattedContent = content;
+      }
+
+      return formattedContent;
+    },
     openViewModalHandler(noteData) {
       this.noteModalData = noteData;
       this.isViewModalVisible = true;
@@ -217,18 +233,24 @@ export default {
         .get()
         .then((querySnapshot) => {
           querySnapshot.forEach((doc) => {
-            doc.ref.delete();
+            doc.ref.delete().then(() => {
+              this.retrieveNotes();
+              this.$toasted.info("Note Deleted", {
+                position: "bottom-right",
+                duration: 5000,
+              });
+            });
           });
-
-          this.retrieveNotes();
-          this.$toasted.info("Note Deleted", {
-            position: "bottom-right",
-            duration: 5000,
-          });
+        })
+        .catch(() => {
+          this.$toasted.error(
+            "Somethings went wrong. Please try again later.",
+            { position: "bottom-right", duration: 5000 }
+          );
         });
     },
     changeStatusHandler(id) {
-      this.$refs.topProgress.start();
+      this.isChangeStatusLoading = true;
 
       db.collection("notes")
         .where("__name__", "==", id)
@@ -240,12 +262,18 @@ export default {
                 is_completed: doc.data().is_completed === true ? false : true,
               })
               .then(() => {
+                this.isChangeStatusLoading = false;
                 this.retrieveNotes();
               });
           });
+        })
+        .catch(() => {
+          this.isChangeStatusLoading = false;
+          this.$toasted.error(
+            "Somethings went wrong. Please try again later.",
+            { position: "bottom-right", duration: 5000 }
+          );
         });
-
-      this.$refs.topProgress.done();
     },
   },
   created() {
